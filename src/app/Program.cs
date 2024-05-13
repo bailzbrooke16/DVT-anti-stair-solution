@@ -1,4 +1,5 @@
-﻿namespace app;
+﻿
+namespace app;
 
 class Program
 {

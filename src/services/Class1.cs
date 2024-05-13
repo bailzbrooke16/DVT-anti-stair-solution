@@ -1,4 +1,4 @@
-﻿namespace data;
+﻿namespace services;
 
 public class Class1
 {
