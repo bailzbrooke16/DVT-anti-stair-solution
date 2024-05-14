@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using data.Models;
 
 namespace services
@@ -13,7 +12,6 @@ namespace services
             this.seedInitialElevators();
 
             this.tripProcessor = new TripProcessorService();
-            
 
             Thread elevatorCheckThread = new Thread(ElevatorStatusChecker);
             elevatorCheckThread.Start();
@@ -65,8 +63,12 @@ namespace services
                     try
                     {
                         int destinationFloor = Convert.ToInt16(Console.ReadLine());
-                        createTrip(originFloor,passengers,destinationFloor);                        
-
+                        if(originFloor == destinationFloor){
+                            Console.WriteLine($"You cannot have the same origin and destination floor");
+                        }
+                        else{
+                            createTrip(originFloor, passengers, destinationFloor);
+                        } 
                     }
                     catch (Exception ex)
                     {
@@ -84,14 +86,16 @@ namespace services
             }
         }
 
-        private void createTrip(int originFloor, int passengers, int destinationFloor){
+        private void createTrip(int originFloor, int passengers, int destinationFloor)
+        {
             try
             {
                 Trip newTrip = new Trip()
                 {
                     originFloor = originFloor,
                     destinationFloor = destinationFloor,
-                    numberOfPassengers = passengers
+                    numberOfPassengers = passengers,
+                    direction = originFloor < destinationFloor ? "Upwards" : "Downwards"
                 };
                 this.tripProcessor.addTripToQueue(newTrip);
                 Console.WriteLine($"Your trip has been added to the queue");
@@ -102,15 +106,58 @@ namespace services
             }
         }
 
-        private void processQueue(){
-            while(true){
+        private void processQueue()
+        {
+            while (true)
+            {
                 Trip? nextTrip = this.tripProcessor.getNextTrip();
-                if(nextTrip != null){
-                    Console.WriteLine($"Destination Floor : {nextTrip.destinationFloor}");
+                if (nextTrip != null)
+                {
+                    Elevator bestElevator = getMostViableElevator(nextTrip);
+
                 }
                 Thread.Sleep(5000);
             }
         }
 
+        private List<Elevator> getElevatorsInASpecificDirection(List<Elevator> elevatorSet , string direction)
+        {
+            return elevatorSet.Where(elevator => elevator.direction == direction).ToList();
+        }
+
+        private Elevator getNearestElevatorToFloor(List<Elevator> viableElevators, int desiredFloor)
+        {
+            Elevator nearestElevator = viableElevators[0];
+            int minDistance = int.MaxValue;
+
+            foreach (var elevator in viableElevators)
+            {
+                int distance = Math.Abs(elevator.currentFloor - desiredFloor);
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    nearestElevator = elevator;
+                }
+            }
+
+            return nearestElevator;
+        }
+
+        private Elevator getMostViableElevator(Trip trip){
+            List<Elevator> inactiveViableElevators = getElevatorsInASpecificDirection(this.initialElevators , "None");
+            List<Elevator> viableElevators = getElevatorsInASpecificDirection(this.initialElevators, trip.direction); 
+            viableElevators.AddRange(inactiveViableElevators);
+
+            if(viableElevators.Count == 0){
+                Elevator nearestElevator = getNearestElevatorToFloor(this.initialElevators, trip.originFloor);
+                return nearestElevator;
+            }
+            else{
+                Elevator nearestElevator = getNearestElevatorToFloor(viableElevators,trip.originFloor);
+                return nearestElevator;
+            }
+
+            
+        }
     }
 }
