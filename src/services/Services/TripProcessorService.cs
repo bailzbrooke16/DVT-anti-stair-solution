@@ -13,12 +13,11 @@ namespace services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error fetching the next trip from queue: {ex.Message}");
                 return null;
             }
         }
 
-        
+
 
         public void addTripToQueue(Trip trip)
         {

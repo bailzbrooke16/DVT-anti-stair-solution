@@ -21,6 +21,8 @@ namespace services
             Thread inputAllowerThread = new Thread(ListenForInput);
             inputAllowerThread.Start();
 
+            Thread processQueueThread = new Thread(processQueue);
+            processQueueThread.Start();
 
         }
 
@@ -97,6 +99,16 @@ namespace services
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred adding your trip to the queue : {ex.Message}");
+            }
+        }
+
+        private void processQueue(){
+            while(true){
+                Trip? nextTrip = this.tripProcessor.getNextTrip();
+                if(nextTrip != null){
+                    Console.WriteLine($"Destination Floor : {nextTrip.destinationFloor}");
+                }
+                Thread.Sleep(5000);
             }
         }
 
