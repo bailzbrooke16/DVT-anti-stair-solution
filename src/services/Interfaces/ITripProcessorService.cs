@@ -4,7 +4,7 @@ namespace services
 {
     public interface ITripProcessorService
     {
-        public void actionNextTrip();
+        public Trip? getNextTrip();
         public void addTripToQueue(Trip trip);
 
     }
