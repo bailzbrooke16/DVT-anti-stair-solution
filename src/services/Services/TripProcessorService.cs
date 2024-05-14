@@ -4,14 +4,31 @@ namespace services
 {
     public class TripProcessorService : ITripProcessorService
     {
-        public void actionNextTrip()
+        private Queue<Trip> tripQueue = new Queue<Trip>();
+        public Trip? getNextTrip()
         {
-            throw new NotImplementedException();
+            try
+            {
+               return tripQueue.Dequeue();
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
+
+
 
         public void addTripToQueue(Trip trip)
         {
-            throw new NotImplementedException();
+            try
+            {
+                tripQueue.Enqueue(trip);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding trip to queue: {ex.Message}");
+            }
         }
     }
 }
